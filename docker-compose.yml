@@ -1,0 +1,40 @@
+version: '3.8'
+services: 
+  nodejs:
+    container_name: nodejs
+    image: nodejs-image    
+    build: .
+    ports: 
+      - 4000:3000
+    environment:     
+      - MONGO_URI=mongodb://admin:admin@mongodb:27017/EmployeeDB
+    networks: 
+      - connectivity 
+    depends_on:
+      - mongodb  
+
+  mongodb:
+    container_name: mongdb
+    image: mongo:latest
+    environment: 
+      - MONGO_DB_APP_PASSWORD=admin
+      - MONGO_DB_APP_USERNAME=admin
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+      - MONGO_INITDB_DATABASE=EmployeeDB
+    command: >
+         bash -c "mongo admin -u admin -p admin --eval 'db.getSiblingDB('EmployeeDB').createUser({user: 'admin', pwd: 'admin', roles: [{role: 'readWrite', db: 'EmployeeDB'}]});'"
+    ports: 
+      - 27017:27017
+    networks: 
+      - connectivity  
+    volumes: 
+      - data:/data/db
+      - config:/data/configdb
+
+volumes: 
+ data: 
+ config:
+  
+networks: 
+ connectivity:
